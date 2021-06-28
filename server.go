@@ -3,11 +3,14 @@ package main
 import "net/http"
 
 type server struct {
-	router *http.ServeMux
+	router              http.ServeMux
+	defaultUpstreamHost string
 }
 
 func newServer() *server {
 	s := &server{}
+	s.routes()
+	s.defaultUpstreamHost = GithubUpstream
 	return s
 }
 

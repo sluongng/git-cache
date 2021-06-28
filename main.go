@@ -15,7 +15,6 @@ func main() {
 
 func run() error {
 	s := newServer()
-	http.HandleFunc("/", s.ProxyHandler())
 
-	return http.ListenAndServe("localhost:8080", nil)
+	return http.ListenAndServe("localhost:8080", s)
 }

@@ -24,7 +24,7 @@ func (s *server) ProxyHandler() http.HandlerFunc {
 
 		upstream := r.Header.Get(UpstreamHeader)
 		if upstream == "" {
-			upstream = GithubUpstream
+			upstream = s.defaultUpstreamHost
 		}
 		upstreamURL, err := url.Parse(upstream)
 		if err != nil {
