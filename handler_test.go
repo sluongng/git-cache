@@ -19,6 +19,7 @@ func TestProxyHandler(t *testing.T) {
 
 	s.ServeHTTP(w, r)
 	is.Equal(w.Code, http.StatusOK)
+	is.True(w.Body.Len() > 0)
 }
 
 func TestProxyHeader(t *testing.T) {
@@ -32,6 +33,6 @@ func TestProxyHeader(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	s.ServeHTTP(w, r)
-
 	is.Equal(w.Code, http.StatusOK)
+	is.True(w.Body.Len() > 0)
 }

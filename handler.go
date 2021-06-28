@@ -16,7 +16,7 @@ const (
 
 func (s *server) ProxyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		b, err := httputil.DumpRequest(r, false)
+		b, err := httputil.DumpRequest(r, true)
 		if err != nil {
 			log.Fatal(err)
 		}
