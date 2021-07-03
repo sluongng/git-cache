@@ -2,6 +2,11 @@ package main
 
 import "net/http"
 
+const (
+	GithubUpstream = "https://github.com"
+	GitlabUpstream = "https://gitlab.com"
+)
+
 type server struct {
 	router              http.ServeMux
 	defaultUpstreamHost string

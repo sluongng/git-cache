@@ -9,12 +9,24 @@ import (
 
 const (
 	UpstreamHeader = "GIT-CACHE-UPSTREAM"
-
-	GithubUpstream = "https://github.com"
-	GitlabUpstream = "https://gitlab.com"
 )
 
-func (s *server) ProxyHandler() http.HandlerFunc {
+func (s *server) InfoRefHandler() http.HandlerFunc {
+	log.Println("InfoRefHandler")
+	return s.proxyHandler()
+}
+
+func (s *server) ReceivePackHandler() http.HandlerFunc {
+	log.Println("ReceivePackHandler")
+	return s.proxyHandler()
+}
+
+func (s *server) UploadPackHandler() http.HandlerFunc {
+	log.Println("UploadPackHandler")
+	return s.proxyHandler()
+}
+
+func (s *server) proxyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		b, err := httputil.DumpRequest(r, true)
 		if err != nil {
