@@ -8,19 +8,34 @@ import (
 )
 
 const (
-	UpstreamHeader = "GIT-CACHE-UPSTREAM"
+	UpstreamHeader = "Git-Cache-Upstream"
 )
 
+// InfoRefHandler handles the incoming GET /info/refs requests which often initiated by
+// all git activities that interacts with remotes.
+// The operations is meant so that the client can retrieve the capabilities of remote
+// to decide what could/should be used in the follow up operations.
+//
+// Current implementation is to forward all of these requests upstream.
 func (s *server) InfoRefHandler() http.HandlerFunc {
 	log.Println("InfoRefHandler")
 	return s.proxyHandler()
 }
 
+// ReceivePackHandler handles the incoming POST requests which often initiated by
+// git operations such as:
+//   - git-push
 func (s *server) ReceivePackHandler() http.HandlerFunc {
 	log.Println("ReceivePackHandler")
 	return s.proxyHandler()
 }
 
+// UploadPackHandler handles the incoming POST requests which often initiated by
+// git operations such as:
+//   - git-fetch
+//   - git-clone
+//   - git-pull
+//   - git-archive
 func (s *server) UploadPackHandler() http.HandlerFunc {
 	log.Println("UploadPackHandler")
 	return s.proxyHandler()
@@ -28,7 +43,7 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 
 func (s *server) proxyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		b, err := httputil.DumpRequest(r, true)
+		b, err := httputil.DumpRequest(r, false)
 		if err != nil {
 			log.Fatal(err)
 		}
