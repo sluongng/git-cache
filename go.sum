@@ -1,2 +1,4 @@
+github.com/google/gitprotocolio v0.0.0-20210704173409-b5a56823ae52 h1:/a887PZoXM9aLYwXS2ufq+Gnr5KUg5gm8gBoxKjnQuo=
+github.com/google/gitprotocolio v0.0.0-20210704173409-b5a56823ae52/go.mod h1:O2KL6wjnwAu7+dPSZhhrjp35gFdyoHlP/f6dhc9YupY=
 github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
 github.com/matryer/is v1.4.0/go.mod h1:8I/i5uYgLzgsgEloJE1U6xx5HkBQpAZvepWuujKwMRU=
