@@ -75,13 +75,7 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 				break
 			}
 
-			c := scanner.Chunk()
-
-			// Skipping chunks without command for now as they are noisy
-			// TODO: find use for these extra chunks
-			if c.Command == "" {
-				continue
-			}
+			c := ConvertChunk(scanner.Chunk())
 
 			data, err := json.MarshalIndent(c, "", " ")
 			if err != nil {
@@ -96,6 +90,18 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 
 		// Pass the original request to proxy to upstream
 		proxyHandler(w, r)
+	}
+}
+
+type ProtocolV2RequestConvertedChunk struct {
+	*gitprotocolio.ProtocolV2RequestChunk
+	ArgumentString string
+}
+
+func ConvertChunk(c *gitprotocolio.ProtocolV2RequestChunk) *ProtocolV2RequestConvertedChunk {
+	return &ProtocolV2RequestConvertedChunk{
+		ProtocolV2RequestChunk: c,
+		ArgumentString:         string(c.Argument),
 	}
 }
 
