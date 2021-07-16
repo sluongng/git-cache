@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -58,23 +59,9 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 		// into memory.  In the future, we should be smart about when to stop
 		// and/or be more selective on which requests to analyze the body.
 
-		// Read from request Body
-		b, err := io.ReadAll(r.Body)
+		bodyReader, err := extractRequestBody(r)
 		if err != nil {
-			log.Fatalln("Unable to read body: %w", err)
-		}
-
-		// Handle compression
-		var bodyReader io.Reader
-		if r.Header.Get("Content-Encoding") == "gzip" {
-			gzipReader, err := gzip.NewReader(bytes.NewReader(b))
-			if err != nil {
-				log.Fatalln("Unable to read body: %w", err)
-			}
-
-			bodyReader = gzipReader
-		} else {
-			bodyReader = bytes.NewReader(b)
+			log.Fatalln("could not extract request body: %w\n", err)
 		}
 
 		// Parse and handle git protocol command and content
@@ -107,14 +94,39 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 			}
 		}
 
-		// Rewrite the read bytes into the body to upstream request
-		// this is needed as the request body buffer was closed after
-		// previous read.
-		r.Body = io.NopCloser(bytes.NewReader(b))
-
 		// Pass the original request to proxy to upstream
 		proxyHandler(w, r)
 	}
+}
+
+// extractRequestBody extracts the request body into a new io.Reader without
+// affecting the request state.  The returned reader is decompressed for easier
+// processing.
+func extractRequestBody(r *http.Request) (io.Reader, error) {
+	// Read from request Body
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Fatalln("Unable to read body: %w", err)
+	}
+	// Rewrite the read bytes into the body to upstream request
+	// this is needed as the request body buffer was closed after
+	// previous read.
+	r.Body = io.NopCloser(bytes.NewReader(b))
+
+	// Handle compression
+	var bodyReader io.Reader
+	if r.Header.Get("Content-Encoding") == "gzip" {
+		gzipReader, err := gzip.NewReader(bytes.NewReader(b))
+		if err != nil {
+			return nil, fmt.Errorf("cannot create gzip reader: %w", err)
+		}
+
+		bodyReader = gzipReader
+	} else {
+		bodyReader = bytes.NewReader(b)
+	}
+
+	return bodyReader, nil
 }
 
 func (s *server) proxyHandler() http.HandlerFunc {
