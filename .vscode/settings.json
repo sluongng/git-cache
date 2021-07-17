@@ -1,0 +1,6 @@
+{
+    "go.buildFlags": [
+        "-v",
+        "-tags=integration"
+    ]
+}
