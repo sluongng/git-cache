@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -110,27 +109,22 @@ func extractRequestBody(r *http.Request) (io.Reader, error) {
 	if err != nil {
 		log.Fatalln("Unable to read body: %w", err)
 	}
+
 	// Rewrite the read bytes into the body to upstream request
 	// this is needed as the request body buffer was closed after
 	// previous read.
 	r.Body = io.NopCloser(bytes.NewReader(b))
 
 	// Handle compression
-	var bodyReader io.Reader
 	if r.Header.Get("Content-Encoding") == "gzip" {
-		gzipReader, err := gzip.NewReader(bytes.NewReader(b))
-		if err != nil {
-			return nil, fmt.Errorf("cannot create gzip reader: %w", err)
-		}
-
-		bodyReader = gzipReader
-	} else {
-		bodyReader = bytes.NewReader(b)
+		return gzip.NewReader(bytes.NewReader(b))
 	}
 
-	return bodyReader, nil
+	return bytes.NewReader(b), nil
 }
 
+// proxyHandler handles the requests by forwarding it to upstream.
+// if no upstream is specified, it will use the server.defaultUpstreamHost
 func (s *server) proxyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		b, err := httputil.DumpRequest(r, false)
@@ -150,8 +144,7 @@ func (s *server) proxyHandler() http.HandlerFunc {
 
 		proxy := httputil.NewSingleHostReverseProxy(upstreamURL)
 
-		// change req.Host so github would not fail
-		// and response with a redirect
+		// change req.Host so github would not response with a redirect and fail
 		defaultDirector := proxy.Director
 		proxy.Director = func(req *http.Request) {
 			defaultDirector(req)
