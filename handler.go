@@ -67,7 +67,7 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 		// Parse and handle git protocol command and content
 		scanner := gitprotocolio.NewProtocolV2Request(bodyReader)
 		for {
-			if ok := scanner.Scan(); !ok {
+			if !scanner.Scan() {
 				if scanner.Err() != nil {
 					log.Printf("Unable to scan request: %s\n", scanner.Err())
 				}
@@ -82,10 +82,6 @@ func (s *server) UploadPackHandler() http.HandlerFunc {
 				log.Fatalln("Unable to unmarshal chunk: %w", err)
 			}
 			log.Printf("chunk: %s", string(data))
-
-			if c.EndRequest {
-				break
-			}
 		}
 
 		// Pass the original request to proxy to upstream
